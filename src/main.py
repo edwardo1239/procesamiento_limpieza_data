@@ -3,6 +3,8 @@ from procesar_calidad import procesar_datos_calidad
 from procesar_descarte import procesar_datos_descarte
 from datos_adicionales import extraer_datos_adicionales
 
+
+
 def cargar_json(file_path):
     """Cargar datos desde un archivo JSON."""
     try:
@@ -13,7 +15,6 @@ def cargar_json(file_path):
     except Exception as e:
         print(f"Error al cargar el archivo JSON: {e}")
         return None
-
 
 if __name__ == "__main__":
     # Ruta al archivo JSON original
@@ -37,6 +38,8 @@ if __name__ == "__main__":
 
     # Unir los datos adicionales con los datos combinados
     df_final = pd.merge(df_combinado, df_adicionales, on="_id", how="left")
+    df_final = df_final[~((df_final['deshidratacion'] > 5) | (df_final['deshidratacion'] < -5))]
+
 
     # Guardar el DataFrame limpio
     df_final.to_csv("data/datos_lotes_limpios.csv", index=False)

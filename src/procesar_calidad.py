@@ -60,8 +60,16 @@ def procesar_datos_calidad(df):
 
         # Aplanar "clasificacionCalidad" con prefijo "clas."
         if "clasificacionCalidad" in item and isinstance(item["clasificacionCalidad"], dict):
+            suma_clas = 0  # Suma de los valores de clasificacionCalidad
             for key, value in item["clasificacionCalidad"].items():
+                # Convertir valores mayores a 1 en porcentaje decimal
+                if isinstance(value, (int, float)) and value > 1:
+                    value = value / 100
+                suma_clas += value  # Sumar el valor
                 registro_plano[f"clas.{key}"] = value
+
+            # Agregar la suma total de clasificacionCalidad
+            registro_plano["clas.suma"] = suma_clas
 
         # Aplanar "inspeccionIngreso" con prefijo "insp."
         if "inspeccionIngreso" in item and isinstance(item["inspeccionIngreso"], dict):
@@ -85,5 +93,10 @@ def procesar_datos_calidad(df):
     df_limpio = df_planos.dropna(subset=columnas)
     df_limpio = df_limpio[(df_limpio[columnas] != 0).all(axis=1)]
     df_limpio = df_limpio[~df_limpio.apply(verificar_valores_iguales, axis=1)]
+
+        # Filtrar filas según la suma de clasificacionCalidad
+    if "clas.suma" in df_limpio.columns:
+        df_limpio = df_limpio[(df_limpio["clas.suma"] <= 1) & (df_limpio["clas.suma"] >= 0.9)]
+
 
     return df_limpio
